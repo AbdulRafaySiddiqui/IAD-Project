@@ -1,0 +1,23 @@
+{
+    "name": "mern-ecommerce",
+    "version": "1.0.0",
+    "description": "ecommerce store with full functionality built on the MERN stack.",
+    "main": "server.js",
+    "scripts": {
+        "start": "node backend/server"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Arsalan-Habib/Mern-Ecommerce.git"
+    },
+    "author": "Arsalan Habib",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Arsalan-Habib/Mern-Ecommerce/issues"
+    },
+    "homepage": "https://github.com/Arsalan-Habib/Mern-Ecommerce#readme",
+    "dependencies": {
+        "axios": "^0.21.0",
+        "express": "^4.17.1"
+    }
+}
