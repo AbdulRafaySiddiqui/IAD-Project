@@ -21,6 +21,8 @@ const PaymentScreen = ({ history }) => {
         e.preventDefault();
         dispatch(savePaymentMethod(paymentMethod));
         history.push("/placeorder");
+
+        localStorage.setItem("paymentMethod", JSON.stringify(paymentMethod));
     };
 
     return (
