@@ -7,7 +7,7 @@ import {
     ORDER_DETAILS_FAIL,
 } from "../constants/orderConstants";
 
-export const orderCreateReducer = (state = {}, action) => {
+export const orderCreateReducer = (state = { paymentMethod: {} }, action) => {
     switch (action.type) {
         case ORDER_CREATE_REQUEST:
             return {
@@ -37,6 +37,7 @@ export const orderDetailsReducer = (
         loading: true,
         orderItems: [],
         shippingAddress: {},
+        order: {},
     },
     action
 ) => {
