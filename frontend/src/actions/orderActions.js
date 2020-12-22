@@ -11,6 +11,7 @@ import {
     ORDER_MY_LIST_REQUEST,
     ORDER_MY_LIST_SUCCESS,
     ORDER_MY_LIST_FAIL,
+    ORDER_MY_LIST_RESET,
 } from "../constants/orderConstants";
 import axios from "axios";
 
@@ -153,4 +154,10 @@ export const listMyOrders = () => async (dispatch, getState) => {
                     : error.message,
         });
     }
+};
+
+export const resetMyOrders = () => async (dispatch) => {
+    dispatch({
+        type: ORDER_MY_LIST_RESET,
+    });
 };
