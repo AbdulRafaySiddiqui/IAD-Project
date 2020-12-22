@@ -35,8 +35,14 @@ const OrderScreen = ({ match }) => {
             document.body.appendChild(script);
         };
 
-        // Dispatches a request to get order details if the order object is empty or if successPay turns true
-        if (Object.keys(order).length === 0 || successPay) {
+        if (
+            Object.keys(order).length === 0 ||
+            (order._id !== undefined && orderId !== order._id)
+        ) {
+            dispatch(getOrderDetails(orderId));
+        }
+
+        if (successPay) {
             dispatch({ type: ORDER_PAY_RESET });
             dispatch(getOrderDetails(orderId));
         } else if (!order.isPaid) {
@@ -46,7 +52,7 @@ const OrderScreen = ({ match }) => {
                 setSdkReady(true);
             }
         }
-    }, [dispatch, orderId, successPay, order]);
+    }, [dispatch, orderId, successPay, order, match]);
 
     const successPaymentHandler = (paymentResult) => {
         console.log(paymentResult);
