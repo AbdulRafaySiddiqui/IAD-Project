@@ -12,6 +12,10 @@ import {
     ORDER_MY_LIST_SUCCESS,
     ORDER_MY_LIST_FAIL,
     ORDER_MY_LIST_RESET,
+    ORDER_LIST_REQUEST,
+    ORDER_LIST_SUCCESS,
+    ORDER_LIST_FAIL,
+    ORDER_LIST_RESET,
 } from "../constants/orderConstants";
 import axios from "axios";
 
@@ -159,5 +163,39 @@ export const listMyOrders = () => async (dispatch, getState) => {
 export const resetMyOrders = () => async (dispatch) => {
     dispatch({
         type: ORDER_MY_LIST_RESET,
+    });
+};
+
+export const listOrders = () => async (dispatch, getState) => {
+    try {
+        dispatch({ type: ORDER_LIST_REQUEST });
+
+        const {
+            userLogin: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };
+
+        const { data } = await axios.get("/api/orders", config);
+
+        dispatch({ type: ORDER_LIST_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: ORDER_LIST_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+};
+
+export const resetOrders = () => async (dispatch) => {
+    dispatch({
+        type: ORDER_LIST_RESET,
     });
 };
