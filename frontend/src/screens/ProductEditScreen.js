@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
@@ -18,6 +19,8 @@ const ProductEditScreen = ({ match, history }) => {
     const [brand, setBrand] = useState("");
     const [category, setCategory] = useState("");
     const [countInStock, setCountInStock] = useState(0);
+    const [uploading, setUploading] = useState(false);
+    const [uploadingError, setUploadingError] = useState(null);
 
     const dispatch = useDispatch();
 
@@ -49,6 +52,28 @@ const ProductEditScreen = ({ match, history }) => {
             }
         }
     }, [product, dispatch, productId, successUpdate, history]);
+
+    const uploadFileHandler = async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append("image", file);
+        setUploading(true);
+
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            };
+
+            const { data } = await axios.post("/api/upload", formData, config);
+            setImage(data);
+            setUploading(false);
+        } catch (error) {
+            setUploading(false);
+            setUploadingError(error.message);
+        }
+    };
 
     const submitHandler = (e) => {
         e.preventDefault();
@@ -106,13 +131,27 @@ const ProductEditScreen = ({ match, history }) => {
                         </Form.Group>
 
                         <Form.Group controlId='image'>
-                            <Form.Label> Product Image </Form.Label>
+                            <Form.Label> Product Image URL </Form.Label>
                             <Form.Control
                                 type='text'
                                 placeholder='Enter image URL'
                                 value={image}
                                 onChange={(e) => setImage(e.target.value)}
                             ></Form.Control>
+                            <Form.File
+                                style={{ marginTop: "8px" }}
+                                id='image-file'
+                                label='Upload File Instead'
+                                custom
+                                onChange={uploadFileHandler}
+                            ></Form.File>
+                            {uploading && <Loader />}
+                            {uploadingError !== null && (
+                                <Message variant='danger'>
+                                    {" "}
+                                    {uploadingError}{" "}
+                                </Message>
+                            )}
                         </Form.Group>
 
                         <Form.Group controlId='description'>
