@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { PayPalButton } from "react-paypal-button-v2";
-import { Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import { Button, Row, Col, ListGroup, Image, Card } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
-import { getOrderDetails, payOrder } from "../actions/orderActions";
-import { ORDER_PAY_RESET } from "../constants/orderConstants";
+import {
+    getOrderDetails,
+    payOrder,
+    deliverOrder,
+} from "../actions/orderActions";
+import {
+    ORDER_DELIVER_RESET,
+    ORDER_PAY_RESET,
+} from "../constants/orderConstants";
 
-const OrderScreen = ({ match }) => {
+const OrderScreen = ({ history, match }) => {
     const dispatch = useDispatch();
 
     const orderId = match.params.id;
 
     const [sdkReady, setSdkReady] = useState(false);
+
+    const userLogin = useSelector((state) => state.userLogin);
+    const { userInfo } = userLogin;
 
     const orderDetails = useSelector((state) => state.orderDetails);
     const { order, loading, error } = orderDetails;
@@ -22,7 +32,18 @@ const OrderScreen = ({ match }) => {
     const orderPay = useSelector((state) => state.orderPay);
     const { loading: loadingPay, success: successPay } = orderPay;
 
+    const orderDeliver = useSelector((state) => state.orderDeliver);
+    const {
+        loading: loadingDeliver,
+        success: successDeliver,
+        error: errorDeliver,
+    } = orderDeliver;
+
     useEffect(() => {
+        if (!userInfo) {
+            history.push("/login");
+        }
+
         const addPayPalScript = async () => {
             const { data: clientId } = await axios.get("/api/config/paypal");
             const script = document.createElement("script");
@@ -42,8 +63,9 @@ const OrderScreen = ({ match }) => {
             dispatch(getOrderDetails(orderId));
         }
 
-        if (successPay) {
+        if (successPay || successDeliver) {
             dispatch({ type: ORDER_PAY_RESET });
+            dispatch({ type: ORDER_DELIVER_RESET });
             dispatch(getOrderDetails(orderId));
         } else if (!order.isPaid) {
             if (!window.paypal) {
@@ -52,11 +74,24 @@ const OrderScreen = ({ match }) => {
                 setSdkReady(true);
             }
         }
-    }, [dispatch, orderId, successPay, order, match]);
+    }, [
+        dispatch,
+        orderId,
+        successPay,
+        order,
+        match,
+        successDeliver,
+        history,
+        userInfo,
+    ]);
 
     const successPaymentHandler = (paymentResult) => {
         console.log(paymentResult);
         dispatch(payOrder(orderId, paymentResult));
+    };
+
+    const deliverHandler = () => {
+        dispatch(deliverOrder(orderId));
     };
 
     return loading ? (
@@ -200,6 +235,30 @@ const OrderScreen = ({ match }) => {
                                     )}
                                 </ListGroup.Item>
                             )}
+
+                            {userInfo &&
+                                userInfo.isAdmin &&
+                                order.isPaid &&
+                                !order.isDelivered &&
+                                (loadingDeliver ? (
+                                    <Loader />
+                                ) : errorDeliver ? (
+                                    <Message variant='danger'>
+                                        {" "}
+                                        {errorDeliver}{" "}
+                                    </Message>
+                                ) : (
+                                    <ListGroup.Item>
+                                        <Button
+                                            type='button'
+                                            variant='success'
+                                            className='btn btn-block'
+                                            onClick={deliverHandler}
+                                        >
+                                            Mark as Delivered.
+                                        </Button>
+                                    </ListGroup.Item>
+                                ))}
                         </ListGroup>
                     </Card>
                 </Col>
